@@ -38,7 +38,8 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:text=" " 
-            android:id="@+id/senhaEditText"/>
+            android:id="@+id/senhaEditText"
+            android:inputType="textPassword" />
     </LinearLayout>
 
     <LinearLayout

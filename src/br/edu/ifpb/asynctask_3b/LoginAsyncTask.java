@@ -1,28 +1,27 @@
 package br.edu.ifpb.asynctask_3b;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.util.Log;
-import android.widget.Toast;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
+import android.widget.Toast;
 import br.edu.ifpb.asynctask_3b.util.HttpService;
+import br.edu.ifpb.asynctask_3b.util.Response;
+
 
 /**
  * Created by Natan Oliveira on 20/12/2015.
  */
 
-public class LoginAsyncTask extends AsyncTask<String, Void, HttpURLConnection>{
+
+public class LoginAsyncTask extends AsyncTask<String, Void, Response>{
 
     Context context;
 
@@ -38,15 +37,21 @@ public class LoginAsyncTask extends AsyncTask<String, Void, HttpURLConnection>{
     }
 
     @Override
-    protected HttpURLConnection doInBackground(String... valores) {
+    protected Response doInBackground(String... valores) {
 
         Log.i("NotificationWearApp", "doInBackground: " + valores[0]);
 
+        Response response = null;
         HttpURLConnection connection = null;
 
         try {
 
             connection = HttpService.sendGetRequest("servicoservlet");
+
+            int statusCodeHttp = connection.getResponseCode();
+            String contentValue = HttpService.getHttpContent(connection);
+
+            response = new Response(statusCodeHttp, contentValue);
 
         } catch (MalformedURLException ex) {
 
@@ -55,33 +60,36 @@ public class LoginAsyncTask extends AsyncTask<String, Void, HttpURLConnection>{
         } catch (IOException ex) {
 
             Log.e("NotificationWearApp","MalformedURLException");
+
+        } finally {
+
+            connection.disconnect();
         }
 
-        return connection;
+        return response;
     }
 
     @Override
-    protected void onPostExecute(HttpURLConnection connection) {
+    protected void onPostExecute(Response response) {
 
         try {
 
-            int status = connection.getResponseCode();
+            int status = response.getStatusCodeHttp();
 
-            Log.i("NotificationWearApp", "Status HTTP-Response: " + status);
+            if (status == HttpURLConnection.HTTP_OK) {
 
-            String contentValue = HttpService.getHttpContent(connection);
-            JSONObject json = new JSONObject(contentValue);
+                JSONObject json = new JSONObject(response.getContentValue());
 
-            String nome = json.getString("nome");
-            Toast.makeText(context, nome, Toast.LENGTH_LONG).show();
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
+                String nome = json.getString("nome");
+                Log.i("NotificationWearApp", "Nome: " + nome);
+                Toast.makeText(context, nome, Toast.LENGTH_LONG).show();
+            }
 
         } catch (JSONException e) {
 
-            Log.e("NotificationWearApp", "JSONException");
+            Log.e("NotificationWearApp", "JSONException: " + e);
         }
     }
 }
+
+

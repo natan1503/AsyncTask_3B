@@ -2,6 +2,8 @@ package br.edu.ifpb.asynctask_3b.util;
 
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,33 +18,24 @@ import java.net.URL;
 public class HttpService {
 
     // IP da máquina onde se encontra o servidor.
-    private static final String URL_CONTEXT = "http://192.168.1.178:8080/rest-servlet-service/";
+    private static final String URL_CONTEXT = "http://192.168.0.168:8080/rest-servlet-service/";
 
     public static HttpURLConnection sendGetRequest(String service)
             throws MalformedURLException, IOException{
 
         HttpURLConnection connection = null;
 
-        try {
+        URL url = new URL(URL_CONTEXT + service);
 
-            URL url = new URL(URL_CONTEXT + service);
-
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(10000);
-            connection.setReadTimeout(15000);
-            connection.connect();
-
-        } finally {
-
-            connection.disconnect();
-        }
+        connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.connect();
 
         return connection;
     }
 
-    public void sendJsonPostRequest() {
-
+    public void sendJsonPostRequest(String service, JSONObject json) {
+        //TODO: Implementar conexão com o Servidor REST.
     }
 
     public static String getHttpContent(HttpURLConnection connection) {
